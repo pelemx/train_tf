@@ -1,0 +1,532 @@
+{
+  "a": {
+    "states": {
+      "standard": [
+        "phone_a_04.png",
+        "phone_a_05.png"
+      ],
+      "wide": [
+        "phone_a_01.png",
+        "phone_a_02.png"
+      ],
+      "max": [
+        "phone_a_03.png"
+      ],
+      "teeth": [
+        "phone_a_06.png",
+        "phone_a_07.png"
+      ]
+    }
+  },
+  "e": {
+    "states": {
+      "standard": [
+        "phone_e_04.png",
+        "phone_e_01.png"
+      ],
+      "tight": [
+        "phone_e_02.png",
+        "phone_e_03.png"
+      ],
+      "wide": [
+        "phone_e_05.png"
+      ]
+    }
+  },
+  "i": {
+    "states": {
+      "standard": [
+        "phone_i_04.png"
+      ],
+      "wide": [
+        "phone_i_01.png",
+        "phone_i_05.png"
+      ],
+      "tight": [
+        "phone_i_02.png",
+        "phone_i_03.png"
+      ]
+    }
+  },
+  "y": {
+    "states": {
+      "standard": [
+        "phone_i_04.png"
+      ],
+      "wide": [
+        "phone_i_01.png",
+        "phone_i_05.png"
+      ],
+      "tight": [
+        "phone_i_02.png",
+        "phone_i_03.png"
+      ]
+    }
+  },
+  "o": {
+    "states": {
+      "standard": [
+        "phone_o_06.png"
+      ],
+      "large": [
+        "phone_o_01.png",
+        "phone_o_03.png"
+      ],
+      "small": [
+        "phone_o_02.png",
+        "phone_o_04.png"
+      ]
+    }
+  },
+  "u": {
+    "states": {
+      "standard": [
+        "phone_u_06.png"
+      ],
+      "tight": [
+        "phone_u_01.png",
+        "phone_u_02.png"
+      ],
+      "protruding": [
+        "phone_u_03.png"
+      ]
+    }
+  },
+  "w": {
+    "states": {
+      "standard": [
+        "phone_u_06.png"
+      ],
+      "tight": [
+        "phone_u_01.png",
+        "phone_u_02.png"
+      ],
+      "protruding": [
+        "phone_u_03.png"
+      ]
+    }
+  },
+  "t": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "d": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "n": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "l": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "s": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "z": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "c": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "j": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "k": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "g": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "h": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "r": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "q": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "x": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "f": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "v": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "ng": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "ny": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "sy": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "kh": {
+    "states": {
+      "standard": [
+        "phone_flat_04.png",
+        "phone_flat_09.png",
+        "phone_flat_10.png"
+      ],
+      "parted": [
+        "phone_flat_01.png",
+        "phone_flat_07.png"
+      ],
+      "compressed": [
+        "phone_flat_05.png"
+      ]
+    }
+  },
+  "m": {
+    "states": {
+      "standard": [
+        "phone_closed_04.png",
+        "phone_closed_10.png"
+      ],
+      "relaxed": [
+        "phone_closed_01.png",
+        "phone_closed_06.png"
+      ],
+      "firm": [
+        "phone_closed_02.png",
+        "phone_closed_05.png"
+      ]
+    }
+  },
+  "b": {
+    "states": {
+      "standard": [
+        "phone_closed_04.png",
+        "phone_closed_10.png"
+      ],
+      "relaxed": [
+        "phone_closed_01.png",
+        "phone_closed_06.png"
+      ],
+      "firm": [
+        "phone_closed_02.png",
+        "phone_closed_05.png"
+      ]
+    }
+  },
+  "p": {
+    "states": {
+      "standard": [
+        "phone_closed_04.png",
+        "phone_closed_10.png"
+      ],
+      "relaxed": [
+        "phone_closed_01.png",
+        "phone_closed_06.png"
+      ],
+      "firm": [
+        "phone_closed_02.png",
+        "phone_closed_05.png"
+      ]
+    }
+  },
+  "silence": {
+    "states": {
+      "standard": [
+        "phone_closed_04.png",
+        "phone_closed_10.png"
+      ],
+      "relaxed": [
+        "phone_closed_01.png",
+        "phone_closed_06.png"
+      ],
+      "firm": [
+        "phone_closed_02.png",
+        "phone_closed_05.png"
+      ]
+    }
+  },
+  "sil": {
+    "states": {
+      "standard": [
+        "phone_closed_04.png",
+        "phone_closed_10.png"
+      ],
+      "relaxed": [
+        "phone_closed_01.png",
+        "phone_closed_06.png"
+      ],
+      "firm": [
+        "phone_closed_02.png",
+        "phone_closed_05.png"
+      ]
+    }
+  },
+  "blink": {
+    "states": {
+      "standard": [
+        "phone_blink.png"
+      ]
+    }
+  },
+  "pause": {
+    "states": {
+      "standard": [
+        "phone_closed_04.png",
+        "phone_closed_10.png"
+      ],
+      "relaxed": [
+        "phone_closed_01.png",
+        "phone_closed_06.png"
+      ],
+      "firm": [
+        "phone_closed_02.png",
+        "phone_closed_05.png"
+      ]
+    }
+  }
+}
