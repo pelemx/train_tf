@@ -32,11 +32,155 @@ import json
 import time
 import argparse
 import itertools
+import tempfile
+import subprocess
 
 import cv2
 import numpy as np
 
+import film_interp
 from film_interp import FilmMorpher, is_available, _load_model
+
+
+def make_rife_midpoint(exe_path: str):
+    """
+    Midpoint via rife-ncnn-vulkan.exe SATU CALL PER MIDPOINT.
+    LAMBAT (model + Vulkan init ~2.5s per spawn) — dipertahankan cuma
+    sebagai fallback. Pakai --engine rife-batch (default lebih cepat).
+    """
+    tmp = tempfile.mkdtemp(prefix="rife_bridge_")
+    pa = os.path.join(tmp, "a.png")
+    pb = os.path.join(tmp, "b.png")
+    po = os.path.join(tmp, "out.png")
+
+    def midpoint(img1_bgr, img2_bgr):
+        cv2.imwrite(pa, img1_bgr)
+        cv2.imwrite(pb, img2_bgr)
+        r = subprocess.run(
+            [exe_path, "-0", pa, "-1", pb, "-o", po],
+            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        if r.returncode != 0 or not os.path.exists(po):
+            raise RuntimeError(f"rife-ncnn-vulkan failed: "
+                               f"{r.stderr.decode(errors='ignore')[:200]}")
+        out = cv2.imread(po, cv2.IMREAD_COLOR)
+        os.remove(po)
+        return out
+
+    return midpoint
+
+
+# ─────────────────────────────────────────────────────
+# BATCH MODE: Eulerian trail — semua pasangan dalam SEDIKIT spawn
+# ─────────────────────────────────────────────────────
+# Insight: rife directory-mode (-i dir -o dir -n N) load model SEKALI
+# lalu stream seluruh sequence. Kita susun image jadi satu jalan panjang
+# di mana tiap pasangan yang dibutuhkan muncul sebagai frame bersebelahan.
+# Meng-cover 741 edge K39 tanpa pengulangan = Eulerian circuit — dan K39
+# degree tiap vertex = 38 (GENAP) -> satu circuit PASTI ada. 5187 spawn
+# jadi ~1 spawn. Init model 1x, GPU streaming penuh.
+
+def eulerian_trails(edges):
+    """Hierholzer di multigraph tak-berarah. Return list of trails
+    (tiap trail = list vertex). Kalau graph nggak connected / ada sisa
+    (mode resume), hasilnya beberapa trail — tiap trail satu spawn."""
+    from collections import defaultdict
+    adj = defaultdict(list)
+    edge_alive = {}
+    for i, (u, v) in enumerate(edges):
+        adj[u].append((v, i))
+        adj[v].append((u, i))
+        edge_alive[i] = True
+
+    trails = []
+    for start in list(adj.keys()):
+        while any(edge_alive[i] for (_, i) in adj[start]):
+            # jalan greedy dari start sampai buntu (Hierholzer sederhana:
+            # trail hasil mungkin >1 per komponen, tetap valid buat kita)
+            trail = [start]
+            cur = start
+            while True:
+                nxt = None
+                lst = adj[cur]
+                while lst and not edge_alive[lst[-1][1]]:
+                    lst.pop()
+                for k in range(len(lst) - 1, -1, -1):
+                    v, ei = lst[k]
+                    if edge_alive[ei]:
+                        nxt, nei = v, ei
+                        break
+                if nxt is None:
+                    break
+                edge_alive[nei] = False
+                trail.append(nxt)
+                cur = nxt
+            if len(trail) > 1:
+                trails.append(trail)
+    return trails
+
+
+def run_rife_batch(exe, trails, get_img, fm, levels, chunk_edges=250):
+    """
+    Per trail (dipotong per chunk_edges biar disk & resume enak):
+      1. tulis frame trail sebagai sequence 00000001.png..
+      2. SATU spawn: exe -i seq -o out -n (E*S+1)  [S = 2^levels]
+      3. out frame k -> global t = k/S -> gap k//S, step k%S
+      4. rakit 9-frame sequence per pasangan -> simpan 2 arah
+    """
+    S = 2 ** levels
+    total_edges = sum(len(t) - 1 for t in trails)
+    done_edges = 0
+    t0 = time.time()
+
+    chunks = []
+    for trail in trails:
+        for s in range(0, len(trail) - 1, chunk_edges):
+            chunks.append(trail[s:s + chunk_edges + 1])
+
+    print(f"[*] Batch: {total_edges} pasangan dalam {len(chunks)} spawn "
+          f"(vs {total_edges * (S - 1)} spawn di mode lama)")
+
+    for ci, chunk in enumerate(chunks):
+        E = len(chunk) - 1
+        n_out = E * S + 1
+        seq_dir = tempfile.mkdtemp(prefix="rife_seq_")
+        out_dir = tempfile.mkdtemp(prefix="rife_out_")
+        for i, p in enumerate(chunk):
+            cv2.imwrite(os.path.join(seq_dir, f"{i + 1:08d}.png"), get_img(p))
+
+        r = subprocess.run(
+            [exe, "-i", seq_dir, "-o", out_dir, "-n", str(n_out)],
+            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        outs = sorted(os.listdir(out_dir))
+        if r.returncode != 0 or len(outs) != n_out:
+            raise RuntimeError(
+                f"rife batch gagal (got {len(outs)}/{n_out} frames). "
+                f"Model exe kamu mungkin nggak support -n arbitrary "
+                f"(butuh rife-v4.x, coba tambah argumen model: "
+                f"-m rife-v4.6 di folder exe). stderr: "
+                f"{r.stderr.decode(errors='ignore')[:200]}")
+
+        out_frames = {}   # lazy read per gap biar hemat RAM
+        for g in range(E):
+            a, b = chunk[g], chunk[g + 1]
+            seq = [get_img(a)]
+            for step in range(1, S):
+                fpath = os.path.join(out_dir, outs[g * S + step])
+                seq.append(cv2.imread(fpath, cv2.IMREAD_COLOR))
+            seq.append(get_img(b))
+            fm._save_to_disk(fm._pair_hash((a, b)), seq)
+            fm._save_to_disk(fm._pair_hash((b, a)), list(reversed(seq)))
+            done_edges += 1
+
+        for d in (seq_dir, out_dir):
+            for f in os.listdir(d):
+                os.remove(os.path.join(d, f))
+            os.rmdir(d)
+
+        elapsed = time.time() - t0
+        rate = elapsed / max(1, done_edges)
+        eta = rate * (total_edges - done_edges)
+        print(f"    chunk [{ci + 1}/{len(chunks)}] | {done_edges}/{total_edges} "
+              f"pasangan | {rate:.2f}s/pair | ETA {eta / 60:.1f} min")
 
 
 def gather_unique_images(pool: dict, image_folder: str) -> list:
@@ -86,18 +230,43 @@ def main():
                     help="semua pasangan unik di pool")
     ap.add_argument("--from-timeline", default=None,
                     help="path JSON timeline (entry punya 'image_path')")
+    ap.add_argument("--engine", choices=["film", "rife", "rife-batch"],
+                    default="rife-batch",
+                    help="rife-batch = Eulerian batch, ~1 spawn (CEPAT, default). "
+                         "rife = 1 spawn per midpoint (lambat, fallback). "
+                         "film = TF Hub (butuh tensorflow).")
+    ap.add_argument("--rife-exe", default="rife-ncnn-vulkan.exe",
+                    help="path ke executable rife-ncnn-vulkan")
     args = ap.parse_args()
 
-    if not is_available():
+    if args.engine in ("rife", "rife-batch"):
+        if not (os.path.exists(args.rife_exe) or
+                any(os.path.exists(os.path.join(p, args.rife_exe))
+                    for p in os.environ.get("PATH", "").split(os.pathsep))):
+            print(f"[!] '{args.rife_exe}' nggak ketemu.")
+            print("    Download portable zip (Windows):")
+            print("    https://github.com/nihui/rife-ncnn-vulkan/releases")
+            print("    Extract, lalu: --rife-exe path\\ke\\rife-ncnn-vulkan.exe")
+            sys.exit(1)
+        if args.engine == "rife":
+            film_interp._film_midpoint = make_rife_midpoint(args.rife_exe)
+            print("[*] Engine: rife per-call (LAMBAT — model init tiap spawn; "
+                  "pertimbangkan --engine rife-batch)")
+        else:
+            print("[*] Engine: rife-batch (Eulerian trail, model init ~1x)")
+    elif not is_available():
         print("[!] tensorflow / tensorflow_hub belum terinstall.")
-        print("    GTX 1080 + CUDA 11 (Windows): pip install tensorflow==2.10.1 tensorflow_hub")
+        print("    Python kamu 3.12+ -> TF 2.10 (GPU Windows) nggak bisa.")
+        print("    Opsi A: venv python 3.10 -> pip install tensorflow==2.10.1 tensorflow_hub")
+        print("    Opsi B: pip install tensorflow tensorflow_hub  (CPU-only, semalam)")
+        print("    Opsi C (rekomendasi): --engine rife  (zero install, GPU Vulkan)")
         sys.exit(1)
 
-    # info device
-    import tensorflow as tf
-    gpus = tf.config.list_physical_devices("GPU")
-    print(f"[*] TensorFlow {tf.__version__} | GPU: "
-          f"{gpus[0].name if gpus else 'NONE (CPU mode — lebih lambat tapi jalan)'}")
+    if args.engine == "film":
+        import tensorflow as tf
+        gpus = tf.config.list_physical_devices("GPU")
+        print(f"[*] TensorFlow {tf.__version__} | GPU: "
+              f"{gpus[0].name if gpus else 'NONE (CPU mode — lebih lambat tapi jalan)'}")
 
     with open(args.pool, "r", encoding="utf-8") as f:
         pool = json.load(f)
@@ -111,7 +280,8 @@ def main():
         print(f"[*] Mode: FULL coverage -> {len(paths)} image unik, "
               f"{len(pairs)} pasangan unordered")
 
-    fm = FilmMorpher(cache_dir=args.cache_dir, levels=args.levels)
+    fm = FilmMorpher(cache_dir=args.cache_dir, levels=args.levels,
+                     allow_compute=True)
     calls_per_pair = (2 ** args.levels) - 1   # midpoint calls per pasangan
 
     # cek resume: pasangan yang cache-nya (dua arah) sudah lengkap
@@ -129,7 +299,8 @@ def main():
         print("[OK] Cache sudah lengkap. Selesai.")
         return
 
-    _load_model()  # download/load sekali di awal biar ETA akurat
+    if args.engine == "film":
+        _load_model()  # download/load sekali di awal biar ETA akurat
 
     img_cache = {}
     def get_img(p):
@@ -139,6 +310,16 @@ def main():
                 raise FileNotFoundError(p)
             img_cache[p] = np.ascontiguousarray(im)
         return img_cache[p]
+
+    if args.engine == "rife-batch":
+        trails = eulerian_trails(todo)
+        run_rife_batch(args.rife_exe, trails, get_img, fm, args.levels)
+        total_frames = len(pairs) * ((2 ** args.levels) + 1)
+        print(f"\n[OK] Bridge library selesai: {len(pairs)} pasangan, "
+              f"~{total_frames} frame di {args.cache_dir}")
+        print("     Set CONFIG['morph_mode'] = 'film' di tesvid2.py — "
+              "render selanjutnya cuma baca PNG, zero model cost.")
+        return
 
     t0 = time.time()
     for i, (a, b) in enumerate(todo):
